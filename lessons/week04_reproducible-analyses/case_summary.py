@@ -1,5 +1,6 @@
 """Shared summary of the San Francisco 311 extract."""
 
+
 def summarize_requests(requests, group_by="district"):
     """Count every request; summarize available, nonnegative closure durations."""
     summary = (
@@ -10,9 +11,10 @@ def summarize_requests(requests, group_by="district"):
     )
     return summary
 
+
 def category_report(requests, category, group_by="district"):
-    """Summarize requests by category."""
+    """Summarize one category by the chosen column."""
     selected = requests.loc[requests["category"] == category]
     report = summarize_requests(selected, group_by=group_by)
-    report["pct_with_time"] = report["with_time"] / report["requests"] * 100
+    report["pct_with_time"] = (100 * report["with_time"] / report["requests"]).round(1)
     return report
