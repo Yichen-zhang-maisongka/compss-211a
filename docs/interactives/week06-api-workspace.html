@@ -112,8 +112,6 @@ footer{border-top:1px solid var(--line);padding:18px 0 30px;font-size:.85rem;col
   <p class="small">Click a name to put it in your code.</p>
   <h3><button type="button" class="name" data-name="data">data</button></h3>
   <p class="small">The saved response, as Python data.</p>
-  <h3><button type="button" class="name" data-name="data2">data2</button></h3>
-  <p class="small">The saved response for the next page.</p>
 </details>
 <details id="outlineBox"><summary>Outline of <code>data</code></summary>
   <div class="outline" id="outline"><p class="small">Loading…</p></div>
@@ -151,12 +149,13 @@ footer{border-top:1px solid var(--line);padding:18px 0 30px;font-size:.85rem;col
 </div>
 </main>
 
-<footer><div class="wrap">COMPSS 211A · UC Berkeley · CC BY 4.0. Python runs in your browser with Pyodide. Your code is saved in this browser only and is not sent anywhere. <code>data</code> and <code>data2</code> are two responses from the <a href="https://openalex.org">OpenAlex</a> API, saved on October 7, 2026 and shortened. <a href="data/week06/openalex_pages_provenance.json">How the copies were made</a>.</div></footer>
+<footer><div class="wrap">COMPSS 211A · UC Berkeley · CC BY 4.0. Python runs in your browser with Pyodide. Your code is saved in this browser only and is not sent anywhere. <code>data</code> is a response from the <a href="https://openalex.org">OpenAlex</a> API, saved on October 7, 2026 and shortened. <a href="data/week06/openalex_pages_provenance.json">How the copies were made</a>.</div></footer>
 
 <script src="sandbox/sandbox.js"></script>
 <script>
 'use strict';
 // The saved responses. Each file sits in data/week06/ next to this page and is read by the Python code as a file.
+// The second page is only used by the simulated OpenAlex.
 const DATA_FILES = ['openalex_page1.json', 'openalex_page2.json', 'openalex_institution.json'];
 const FILES = {};
 const ROOT = '/home/you/week06';
@@ -171,8 +170,6 @@ const SETUP = [
   'pd.set_option("display.max_colwidth", 60)',
   'with open("openalex_page1.json") as f:',
   '    data = json.load(f)',
-  'with open("openalex_page2.json") as f:',
-  '    data2 = json.load(f)',
 ].join('\n');
 // Steps that send a real request also get requests. pyodide_http lets requests work inside a browser.
 const LIVE_SETUP = 'import pyodide_http\npyodide_http.patch_all()\nimport requests';
@@ -182,24 +179,25 @@ const LIVE_SETUP = 'import pyodide_http\npyodide_http.patch_all()\nimport reques
 // answer: the model code. check.exprs: expressions compared after the student's code and after the model code.
 // live: the step sends a request; where it goes follows the “Requests go to” switch.
 // check.labels: what to call an expression in a message. check.truths: for a live request, tests on the student's own result, because a second request would give a different response.
-// pre: code run before the student's code, for a value an earlier step made. live: the step sends a real request.
-// example: code that is shown and can be run. after: shown once the answer is correct. optional: labelled, and left out of the count of checked steps.
+// pre: code run before the student's code, for a value an earlier step made.
+// example: code that is shown and can be run. after: shown once the answer is correct.
 // stage: where the step sits in Basics, Request, Response, Read values, Every work, Table. intro and after can be a list of paragraphs.
 const STEPS = [
   {topic: 'Send a GET request', stage: 'basics', live: true,
    intro: ['OpenAlex is a free catalogue of research. It has a web API: you send a request to a web address, and it sends back data.',
-           'A GET request asks for what is at one address. <code>requests.get(address)</code> sends it and waits. What comes back is the response. Its status code says how the request went: 200 means the server accepted it, and 400 or higher means it did not.',
+           'A GET request asks for what is at one address. The Python package <code>requests</code> sends it: <code>requests.get(address)</code> sends the request and waits. What comes back is the response, kept here in the variable <code>response</code>.',
+           'A response has several parts. A dot and a name gives you one of them. <code>response.status_code</code> is the status code: a number that says how the request went. 200 means the server accepted it, and 400 or higher means it did not.',
            '<span data-source-note="short"></span>'],
-   task: 'Send a GET request to the address in the box: the OpenAlex record of the institution with the ID <code>I95457486</code>. Make <code>status</code>: the status code of the response.',
+   task: 'Fill in the two blanks. The first sends a GET request to the address in the box: the OpenAlex record of the institution with the ID <code>I95457486</code>. The second makes <code>status</code>: the status code of the response.',
    starter: 'import requests\n\nresponse = requests.____("https://api.openalex.org/institutions/I95457486")\nstatus = response.____\nstatus',
    answer: 'import requests\n\nresponse = requests.get("https://api.openalex.org/institutions/I95457486")\nstatus = response.status_code\nstatus',
    check: {truths: [['status != 429', 'OpenAlex answered 429: this network has used up its requests for today. Choose Simulated OpenAlex above the steps and run the code again.'],
                     ['status == 200', 'status should be 200, the code for a request the server accepted. Take it from response.status_code, and check that the address is unchanged.']]},
-   hint: 'The first blank is <code>get</code>. The status code is <code>response.status_code</code>.',
+   hint: 'The first blank is <code>get</code>, so the line reads <code>requests.get(...)</code>. The second blank is <code>status_code</code>, so the line reads <code>status = response.status_code</code>.',
    after: 'The server accepted the request.'},
   {topic: 'Look at the JSON', stage: 'basics', live: true,
    intro: ['A response has a body: the data, as text. <code>response.text</code> is that text. It is written in JSON: curly brackets hold keys with their values, and square brackets hold lists, as in Python.',
-           '<code>response.json()</code> turns the text into Python data.'],
+           '<code>response.json()</code> turns the text into Python data. Here that is a dictionary, and <code>type(record)</code> in the box shows it.'],
    example: 'import requests\n\nresponse = requests.get("https://api.openalex.org/institutions/I95457486")\nprint(response.text[:300])',
    task: 'Run the example and find the key that holds the name of the institution. Then make <code>record</code>: the body as Python data, and <code>name</code>: the name of the institution.',
    starter: 'import requests\n\nresponse = requests.get("https://api.openalex.org/institutions/I95457486")\nrecord = response.____()\nname = record["____"]\nprint(type(record))\nprint(name)',
@@ -209,38 +207,53 @@ const STEPS = [
                     ['name == record.get("display_name")', 'name should be the value stored under the key display_name.']]},
    hint: 'The first blank is <code>json</code>. The name is stored under <code>display_name</code>.',
    after: '<code>I95457486</code> is the ID that OpenAlex gives UC Berkeley. <a href="https://api.openalex.org/institutions/I95457486" target="_blank" rel="noopener">Open the address in a new tab</a> to see the whole body.'},
-  {topic: 'Read more of the record', stage: 'basics', live: true, optional: true,
-   intro: ['Optional practice with the same record. <code>list(record.keys())</code> lists its keys, and square brackets with a key give one value.',
-           'A value can be a dictionary itself, with its own keys. Then use brackets a second time.'],
+  {topic: 'Read more of the record', stage: 'basics', live: true,
+   intro: ['More practice with the same record. <code>list(record.keys())</code> lists its keys. Square brackets with a key give the value stored under that key: <code>record["works_count"]</code> is the number of works OpenAlex has with a Berkeley author.',
+           'A value can be a dictionary with keys of its own. <code>record["geo"]</code> is one: it says where Berkeley is. To read a value inside it, add a second pair of brackets: <code>record["geo"]["country"]</code>.'],
    example: 'import requests\n\nresponse = requests.get("https://api.openalex.org/institutions/I95457486")\nrecord = response.json()\nprint(list(record.keys()))\nprint(record["works_count"])\nprint(record["geo"])',
-   task: 'Run the example. <code>works_count</code> is how many works OpenAlex has with a Berkeley author. <code>geo</code> is a dictionary that says where Berkeley is. Then make <code>n_works</code>: the number of works, and <code>city</code>: the city, from inside <code>geo</code>.',
+   task: 'Run the example. Then fill in the two blanks in the box. Each one is a key: the first holds the number of works, and the second, inside <code>geo</code>, holds the city.',
    starter: 'import requests\n\nresponse = requests.get("https://api.openalex.org/institutions/I95457486")\nrecord = response.json()\nn_works = record["____"]\ncity = record["geo"]["____"]\nprint(n_works, city)',
    answer: 'import requests\n\nresponse = requests.get("https://api.openalex.org/institutions/I95457486")\nrecord = response.json()\nn_works = record["works_count"]\ncity = record["geo"]["city"]\nprint(n_works, city)',
    check: {truths: [['response.status_code != 429', 'OpenAlex answered 429: this network has used up its requests for today. Choose Simulated OpenAlex above the steps and run the code again.'],
                     ['n_works == record["works_count"]', 'n_works should be the value stored under the key works_count.'],
                     ['city == record["geo"]["city"]', 'city should be the value stored under city, inside geo.']]},
-   hint: 'The first blank is <code>works_count</code> and the second is <code>city</code>.',
+   hint: 'Each blank takes the name of a key, not a value. The first is <code>works_count</code> and the second is <code>city</code>.',
    after: 'That is a key, and a key inside a key.'},
+  {topic: 'When a request goes wrong', stage: 'basics', live: true,
+   intro: ['Read the status code before the body. It says how the request went:',
+           '<b>200</b>: the server accepted the request.<br><b>400</b>: something in the request is wrong, such as a parameter.<br><b>401</b> or <b>403</b>: a key is missing or not allowed.<br><b>404</b>: nothing is at that address.<br><b>429</b>: too many requests.<br><b>500</b> and up: the server has a problem. Wait and try again.',
+           'With a code of 400 or higher, the body often says what is wrong.',
+           'The requests now have <code>timeout=30</code>: stop waiting after 30 seconds if no response has come.'],
+   example: 'import requests\n\nresponse = requests.get("https://api.openalex.org/worksz", timeout=30)\nprint(response.status_code)\nprint(response.text[:100])\n\nresponse = requests.get("https://api.openalex.org/works?per_page=500", timeout=30)\nprint(response.status_code)\nprint(response.text[:100])',
+   task: 'Run the example. The first address is misspelled, and the second asks for more works at a time than OpenAlex allows. Then run the code in the box: its address is misspelled too. Fix the address so that <code>status</code> is 200.',
+   starter: 'import requests\n\nresponse = requests.get("https://api.openalex.org/institutionz/I95457486", timeout=30)\nstatus = response.status_code\nprint(status)',
+   answer: 'import requests\n\nresponse = requests.get("https://api.openalex.org/institutions/I95457486", timeout=30)\nstatus = response.status_code\nprint(status)',
+   check: {truths: [['status != 429', 'OpenAlex answered 429: this network has used up its requests for today. Choose Simulated OpenAlex above the steps and run the code again.'],
+                    ['status != 404', 'status is 404: nothing is at that address. Check the spelling of institutions.'],
+                    ['status == 200', 'status should be 200. Take it from response.status_code, and check the address.']]},
+   hint: 'The address should say <code>institutions</code>, not <code>institutionz</code>.',
+   after: 'A 404 is about the address. A 400 is about what you sent to a correct address.'},
   {topic: 'Write a request with parameters', stage: 'request',
    intro: ['To ask for a list of records, you send parameters with the request. The address they go to is the endpoint. For works it is <code>https://api.openalex.org/works</code>.',
-           'The parameters go in a dictionary, and <code>urlencode</code> turns it into the text after the <code>?</code> in the address. <code>filter</code> picks the works, <code>sort</code> puts the most-cited first (<code>desc</code>: from high to low), <code>per_page</code> is how many to send at a time, and <code>cursor</code> is the page: <code>*</code> is the first.'],
-   task: 'Fill in the two blanks so that the request asks for works from <b>2024</b>, <b>five</b> at a time. <code>institutions.id:I95457486</code> keeps works with a UC Berkeley author, and <code>has_abstract:true</code> keeps works that have a summary.',
-   starter: 'params = {\n    "filter": "institutions.id:I95457486,publication_year:____,has_abstract:true",\n    "sort": "cited_by_count:desc",\n    "per_page": ____,\n    "cursor": "*",\n}\nurl = "https://api.openalex.org/works?" + urlencode(params)\nurl',
-   answer: 'params = {\n    "filter": "institutions.id:I95457486,publication_year:2024,has_abstract:true",\n    "sort": "cited_by_count:desc",\n    "per_page": 5,\n    "cursor": "*",\n}\nurl = "https://api.openalex.org/works?" + urlencode(params)\nurl',
+           'The parameters go in a dictionary. <code>urlencode</code> turns the dictionary into the text after the <code>?</code> in the address. It is already loaded on this page.',
+           '<code>filter</code>: which works to send. Here: a UC Berkeley author (<code>institutions.id:I95457486</code>), a year, and works that have a summary (<code>has_abstract:true</code>).<br><code>sort</code>: the order. <code>cited_by_count:desc</code> puts the most-cited first.<br><code>per_page</code>: how many works to send at a time.'],
+   task: 'Fill in the two blanks so that the request asks for works from <b>2024</b>, <b>five</b> at a time. This step builds the address and does not send the request yet.',
+   starter: 'params = {\n    "filter": "institutions.id:I95457486,publication_year:____,has_abstract:true",\n    "sort": "cited_by_count:desc",\n    "per_page": ____,\n}\nurl = "https://api.openalex.org/works?" + urlencode(params)\nurl',
+   answer: 'params = {\n    "filter": "institutions.id:I95457486,publication_year:2024,has_abstract:true",\n    "sort": "cited_by_count:desc",\n    "per_page": 5,\n}\nurl = "https://api.openalex.org/works?" + urlencode(params)\nurl',
    check: {exprs: ['params["filter"]', 'str(params["per_page"])'], labels: {'params["filter"]': 'The filter', 'str(params["per_page"])': 'per_page'}},
    hint: 'The year is <code>2024</code> and the number per page is <code>5</code>.',
-   after: 'That address is the whole request. <a href="https://api.openalex.org/works?filter=institutions.id%3AI95457486%2Cpublication_year%3A2024%2Chas_abstract%3Atrue&amp;sort=cited_by_count%3Adesc&amp;per_page=5&amp;cursor=%2A" target="_blank" rel="noopener">Open it in a new tab</a> to see what OpenAlex sends back.'},
+   after: 'That address is the whole request. <a href="https://api.openalex.org/works?filter=institutions.id%3AI95457486%2Cpublication_year%3A2024%2Chas_abstract%3Atrue&amp;sort=cited_by_count%3Adesc&amp;per_page=5" target="_blank" rel="noopener">Open it in a new tab</a> to see what OpenAlex sends back.'},
   {topic: 'Send the request', stage: 'response', live: true,
-   pre: 'params = {\n    "filter": "institutions.id:I95457486,publication_year:2024,has_abstract:true",\n    "sort": "cited_by_count:desc",\n    "per_page": 5,\n    "cursor": "*",\n}',
-   intro: ['<code>requests.get</code> can build the address: give it the endpoint, and the dictionary as <code>params=</code>. <code>timeout=30</code> makes it stop waiting after 30 seconds. <code>response.url</code> is the address the request went to.',
+   pre: 'params = {\n    "filter": "institutions.id:I95457486,publication_year:2024,has_abstract:true",\n    "sort": "cited_by_count:desc",\n    "per_page": 5,\n}',
+   intro: ['<code>requests.get</code> can build the address: give it the endpoint, and the dictionary as <code>params=</code>. <code>response.url</code> is the address the request went to.',
            '<span data-source-note="budget"></span>'],
-   task: 'Send the request. <code>params</code> is loaded from the last step. Make <code>status</code>: the status code of the response.',
+   task: 'Fill in the two blanks. The first passes the dictionary from the last step, which is loaded here as <code>params</code>. The second makes <code>status</code>: the status code of the response, as in step 1.',
    starter: 'import requests\n\nresponse = requests.get("https://api.openalex.org/works", params=____, timeout=30)\nstatus = response.____\nprint(status)\nprint(response.url)\nprint(response.text[:200])',
    answer: 'import requests\n\nresponse = requests.get("https://api.openalex.org/works", params=params, timeout=30)\nstatus = response.status_code\nprint(status)\nprint(response.url)\nprint(response.text[:200])',
    check: {truths: [['status != 429', 'OpenAlex answered 429: this network has used up its requests for today. Choose Simulated OpenAlex above the steps and run the code again.'],
                     ['"per_page=5" in response.url', 'The request went out without the parameters from the last step. Pass them as params=params.'],
                     ['status == 200', 'status should be 200, the code for a request the server accepted. Take it from response.status_code, and check that the address and params are unchanged.']]},
-   hint: 'The first blank is the name of the dictionary: <code>params</code>. The status code is <code>response.status_code</code>.',
+   hint: 'The first blank is the name of the dictionary: <code>params</code>. The second blank is <code>status_code</code>.',
    after: 'The address is the one you built in the last step. The text is the first 200 characters of the body. The whole body from the actual OpenAlex is about 200,000 characters.'},
   {topic: 'From text to Python data', stage: 'response',
    intro: ['From here on, the steps use a saved copy of the response to that request, so everyone has the same data. It was saved on October 7, 2026 and shortened: OpenAlex sends 51 fields for each work, and the copy keeps seven.',
@@ -252,42 +265,25 @@ const STEPS = [
    answer: 'top_keys = list(data.keys())\ntop_keys',
    check: {exprs: ['list(top_keys)']},
    hint: 'The blank is the name of the dictionary: <code>data</code>.',
-   after: '<code>meta</code> describes the whole result, <code>results</code> holds the works, and <code>group_by</code> is empty for this request. “Outline of data” in the side panel shows every level.'},
-  {topic: 'Read a value', stage: 'values',
-   intro: 'Square brackets with a key give the value stored under that key. <code>data["meta"]</code> is a dictionary too, so you can use brackets on it again.',
-   example: 'data["meta"]',
-   task: 'Make <code>n_matching</code>: how many works matched the request. It is stored under <code>count</code>, inside <code>meta</code>.',
-   starter: 'n_matching = data["____"]["____"]\nn_matching',
-   answer: 'n_matching = data["meta"]["count"]\nn_matching',
-   check: {exprs: ['n_matching']},
-   hint: 'The first key is <code>meta</code> and the second is <code>count</code>.',
-   after: '11,231 works from 2024 have a Berkeley author and an abstract.'},
+   after: '<code>meta</code> describes the whole result: <code>data["meta"]["count"]</code> is 11,231, the number of works that matched. <code>results</code> holds the works, and <code>group_by</code> is empty for this request. “Outline of data” in the side panel shows every level.'},
   {topic: 'Look inside a list', stage: 'values',
-   intro: '<code>data["results"]</code> is a list with one dictionary for each work. <code>len()</code> counts the items in a list. A list takes a position in the brackets, not a key: <code>[0]</code> is the first item.',
-   example: 'print(type(data["results"]))\nprint(type(data["results"][0]))',
-   task: 'Make <code>n_on_page</code>: how many works are in <code>data["results"]</code>. Then make <code>first_title</code>: the <code>display_name</code> of the first work.',
-   starter: 'n_on_page = ____(data["results"])\nfirst_title = data["results"][____]["display_name"]\nprint(n_on_page)\nprint(first_title)',
-   answer: 'n_on_page = len(data["results"])\nfirst_title = data["results"][0]["display_name"]\nprint(n_on_page)\nprint(first_title)',
-   check: {exprs: ['n_on_page', 'first_title']},
-   hint: '<code>len(...)</code> counts the works. The first work is at position <code>0</code>.',
-   after: 'Five works, because the request said <code>per_page</code> 5: the five most-cited of the 11,231.'},
+   intro: '<code>data["results"]</code> is a list with one dictionary for each work. A list takes a position in the brackets, not a key: <code>[0]</code> is the first item, <code>[1]</code> the second. <code>len()</code> counts the items.',
+   example: 'print(len(data["results"]))\nprint(data["results"][1]["display_name"])',
+   task: 'Run the example. It counts the works and prints the title of the second one. Then fill in the blank to get the title of the <b>first</b> work.',
+   starter: 'first_title = data["results"][____]["display_name"]\nfirst_title',
+   answer: 'first_title = data["results"][0]["display_name"]\nfirst_title',
+   check: {exprs: ['first_title']},
+   hint: 'The first work is at position <code>0</code>.',
+   after: 'There are five works because the request said <code>per_page</code> 5. They are the five most-cited of the 11,231.'},
   {topic: 'Go deeper, one level at a time', stage: 'values',
-   intro: 'The name of an author sits several levels down. Go one level at a time and look at what you have: a dictionary takes a key, a list takes a position. An authorship says who an author is and where they work.',
-   example: 'work = data["results"][0]\nprint(list(work.keys()))\nauthorships = work["authorships"]\nprint(type(authorships), len(authorships))\nauthorships[0]',
-   task: 'Make <code>first_author</code>: the name of the first author of the first work.',
+   intro: 'The name of an author sits several levels down. Go one level at a time: a dictionary takes a key, a list takes a position. <code>authorships</code> is a list with one item for each author of a work.',
+   example: 'work = data["results"][0]\nwork["authorships"][0]',
+   task: 'Run the example. It shows the first authorship of the first work. Then fill in the two blanks. Each one is a key: the first holds the list of authorships, and the second, inside one authorship, holds the person.',
    starter: 'work = data["results"][0]\nauthorship = work["____"][0]\nfirst_author = authorship["____"]["display_name"]\nfirst_author',
    answer: 'work = data["results"][0]\nauthorship = work["authorships"][0]\nfirst_author = authorship["author"]["display_name"]\nfirst_author',
    check: {exprs: ['first_author']},
-   hint: 'The first blank is <code>authorships</code>, the key that holds the list. The second is <code>author</code>, the key inside one authorship that holds the person.',
+   hint: 'The first blank is <code>authorships</code>. The second is <code>author</code>.',
    after: 'The same path on one line: <code>data["results"][0]["authorships"][0]["author"]["display_name"]</code>. From left to right: the first work, its first authorship, the author, the name.'},
-  {topic: 'Write it yourself: one value', stage: 'values',
-   intro: '“Outline of data” in the side panel shows where <code>primary_topic</code> sits.',
-   task: 'Make <code>topic</code>: the <code>display_name</code> of the <code>primary_topic</code> of the <b>second</b> work.',
-   starter: '',
-   scaffold: 'work = data["results"][____]\ntopic = work["____"]["____"]\ntopic',
-   answer: 'work = data["results"][1]\ntopic = work["primary_topic"]["display_name"]\ntopic',
-   check: {exprs: ['topic']},
-   hint: 'The second work is at position <code>1</code>. From there, follow two keys: <code>primary_topic</code>, then <code>display_name</code>.'},
   {topic: 'Loop over the works', stage: 'all',
    intro: 'To get the same value from every work, loop over the list. Each time around, <code>work</code> is the dictionary for one work.',
    example: 'for work in data["results"]:\n    print(work["publication_year"], work["cited_by_count"])',
@@ -297,7 +293,7 @@ const STEPS = [
    check: {exprs: ['list(titles)']},
    hint: 'The blank is <code>display_name</code>, the key that holds a work\'s title.'},
   {topic: 'Find missing values', stage: 'all',
-   intro: 'JSON writes a missing value as <code>null</code>, and Python reads it as <code>None</code>. Test for it with <code>is None</code>. An ORCID is an ID number for a researcher. Some authors have none on record.',
+   intro: 'JSON writes a missing value as <code>null</code>, and Python reads it as <code>None</code>. Test for it with <code>is None</code>. An ORCID is an ID number for a researcher. Some authors have none on record: the example shows one.',
    example: 'data["results"][1]["authorships"][0]["author"]',
    task: 'Look at the <b>third</b> work. Make <code>n_authors</code>: how many authors it lists. Make <code>n_no_orcid</code>: how many of them have no ORCID.',
    starter: 'authorships = data["results"][2]["authorships"]\nn_authors = ____(authorships)\nn_no_orcid = 0\nfor authorship in authorships:\n    if authorship["author"]["orcid"] ____ None:\n        n_no_orcid += 1\nprint(n_authors, n_no_orcid)',
@@ -305,32 +301,21 @@ const STEPS = [
    check: {exprs: ['n_authors', 'n_no_orcid']},
    hint: 'The first blank is <code>len</code>, which counts the authors. The second is <code>is</code>.',
    after: 'Two of the seven authors have no ORCID. Missing data can also be an empty list: three of these authors have <code>[]</code> as their <code>institutions</code>.'},
-  {topic: 'Get the next page', stage: 'all',
-   intro: 'The response holds five works out of 11,231. To get the next five, you send the same request with the <code>next_cursor</code> value from <code>meta</code> as the <code>cursor</code>. <code>data2</code> is the saved response to that second request. <code>+</code> joins two lists into one.',
-   task: 'Make <code>cursor</code>: the <code>next_cursor</code> value in <code>data</code>. Then make <code>all_works</code>: the works of both pages in one list.',
-   starter: 'cursor = data["meta"]["____"]\nall_works = data["results"] + data2["____"]\nprint(cursor)\nprint(len(all_works))',
-   answer: 'cursor = data["meta"]["next_cursor"]\nall_works = data["results"] + data2["results"]\nprint(cursor)\nprint(len(all_works))',
-   check: {exprs: ['cursor', '[work["id"] for work in all_works]'], labels: {'[work["id"] for work in all_works]': 'all_works'}},
-   hint: 'The first blank is <code>next_cursor</code>. The works of the second page are under <code>results</code>, as in the first.',
-   after: 'Ten works. All 11,231 at five per page would take 2,247 requests.'},
   {topic: 'Write it yourself: make a table', stage: 'table',
-   pre: 'all_works = data["results"] + data2["results"]',
-   intro: '<code>pd.DataFrame</code> turns a list of dictionaries into a table: one dictionary for each row, one key for each column. <code>all_works</code> is loaded for this step: the ten works from both pages.',
+   intro: '<code>pd.DataFrame</code> turns a list of dictionaries into a table: one dictionary for each row, one key for each column. This time the box is empty and you write all of the code. The hint has a starting point with blanks.',
    example: 'rows = [{"title": "A", "cited_by": 12}, {"title": "B", "cited_by": 7}]\npd.DataFrame(rows)',
-   task: 'Make <code>table</code>: a DataFrame with one row for each work in <code>all_works</code> and three columns: <code>title</code> (the work\'s <code>display_name</code>), <code>cited_by</code> (its <code>cited_by_count</code>) and <code>first_author</code> (the name of its first author).',
+   task: 'Make <code>table</code>: a DataFrame with one row for each work in <code>data["results"]</code> and three columns: <code>title</code> (the work\'s <code>display_name</code>), <code>cited_by</code> (its <code>cited_by_count</code>) and <code>first_author</code> (the name of its first author).',
    starter: '',
-   scaffold: 'rows = []\nfor work in all_works:\n    rows.append({\n        "title": work["____"],\n        "cited_by": work["____"],\n        "first_author": work["authorships"][____]["author"]["____"],\n    })\ntable = pd.DataFrame(rows)\ntable',
-   answer: 'rows = []\nfor work in all_works:\n    rows.append({\n        "title": work["display_name"],\n        "cited_by": work["cited_by_count"],\n        "first_author": work["authorships"][0]["author"]["display_name"],\n    })\ntable = pd.DataFrame(rows)\ntable',
+   scaffold: 'rows = []\nfor work in data["results"]:\n    rows.append({\n        "title": work["____"],\n        "cited_by": work["____"],\n        "first_author": work["authorships"][____]["author"]["____"],\n    })\ntable = pd.DataFrame(rows)\ntable',
+   answer: 'rows = []\nfor work in data["results"]:\n    rows.append({\n        "title": work["display_name"],\n        "cited_by": work["cited_by_count"],\n        "first_author": work["authorships"][0]["author"]["display_name"],\n    })\ntable = pd.DataFrame(rows)\ntable',
    check: {exprs: ['table'], ordered: true, names: true},
    hint: 'Start with an empty list. In a loop, append one dictionary for each work, with the keys <code>title</code>, <code>cited_by</code> and <code>first_author</code>. Then pass the list to <code>pd.DataFrame</code>. The path to an author\'s name is in the “Go deeper” step.',
-   after: 'The table answers the question: the ten most-cited 2024 works with a Berkeley author, and the first author of each.'},
-  {topic: 'Now work in the notebook', stage: 'table', handoff: true,
-   intro: 'For the rest of the class, work in the Week 6 notebook in VS Code: send a request of your own, save the response to a file and turn it into a table.'}
+   after: 'The table answers the question: the five most-cited 2024 works with a Berkeley author, and the first author of each.'}
 ];
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
-const STORE = 'compss211a-week06-api-workspace-2';
+const STORE = 'compss211a-week06-api-workspace-3';
 let current = 0;
 const solved = new Set();
 // tried: steps where a checked answer was wrong. An answer can be opened once the student has tried.
@@ -491,7 +476,7 @@ def _ws_truths(user_ns, spec_json):
 # It answers the requests in the steps with the saved copies: the record of one institution, and the works request
 # with its next page. A wrong request gets the status code and body that the actual OpenAlex gave for it on October 7, 2026.
 _WS_ROOT = "${ROOT}"
-_WS_SIM = {"real_send": None, "count": 0}
+_WS_SIM = {"real_send": None, "count": 0, "limited": False}
 _WS_SIM_PARAMS = "apc_sum, api-key, api_key, cited_by_count_sum, corpus, cursor, data-version, data_version, filter, format, group-by, group-bys, group_by, group_bys, include-xpac, include_xpac, mailto, page, per-page, per_page, q, rerank, sample, search, seed, select, sort, warm"
 _WS_SIM_FILTER = {"institutions.id:I95457486", "publication_year:2024", "has_abstract:true"}
 _WS_SIM_OUTSIDE = (501, {"error": "Simulated OpenAlex", "message": "The simulated OpenAlex only answers the requests in the steps of this workspace: the record of institution I95457486, and the works request (2024, sorted by cited_by_count:desc, five per page) with its next page. Choose Actual OpenAlex above the steps to send other requests."})
@@ -570,18 +555,35 @@ def _ws_sim_send(self, request, **kwargs):
     response.request = request
     return response
 
+def _ws_actual_send(self, request, **kwargs):
+    # Sends the request. A 429 from OpenAlex means the network has used up its requests for the day,
+    # so a request from the steps is then answered from the saved copy, and the page is told to switch.
+    from urllib.parse import urlsplit
+    response = _WS_SIM["real_send"](self, request, **kwargs)
+    if response.status_code == 429 and urlsplit(request.url).hostname == "api.openalex.org":
+        simulated = _ws_sim_send(self, request, **kwargs)
+        if simulated.status_code != 501:
+            _WS_SIM["limited"] = True
+            return simulated
+        _WS_SIM["count"] -= 1
+    return response
+
 def _ws_source(mode):
     # Every request that requests sends passes through Session.send, so that is the one place to switch.
     _WS_SIM["count"] = 0
+    _WS_SIM["limited"] = False
     if "requests" not in sys.modules:
         return
     sessions = sys.modules["requests"].sessions
     if _WS_SIM["real_send"] is None:
         _WS_SIM["real_send"] = sessions.Session.send
-    sessions.Session.send = _ws_sim_send if mode == "simulated" else _WS_SIM["real_send"]
+    sessions.Session.send = _ws_sim_send if mode == "simulated" else _ws_actual_send
 
 def _ws_sim_count():
     return _WS_SIM["count"]
+
+def _ws_limited():
+    return _WS_SIM["limited"]
 `;
 
 let pythonReady = null, helpersLoaded = false;
@@ -612,7 +614,7 @@ const SOURCE_STORE = 'compss211a-week06-api-source';
 const SOURCES = {
   actual: {line: 'They are sent over the internet to api.openalex.org.',
            short: 'Requests go to the <b>actual OpenAlex</b>, over the internet. If one fails, choose Simulated OpenAlex above the steps.',
-           budget: 'Requests go to the <b>actual OpenAlex</b>, over the internet. Run this once or twice, not many times: OpenAlex limits how many list requests a network can send in a day, and the class shares one network. If one fails, choose Simulated OpenAlex above the steps.'},
+           budget: 'Requests go to the <b>actual OpenAlex</b>, over the internet. Run this once or twice, not many times: OpenAlex limits how many list requests a network can send in a day, and the class shares one network. Past the limit it answers with the status code 429, which means too many requests. This page then switches to the simulated OpenAlex.'},
   simulated: {line: 'They stay in your browser. The response is built from a saved copy.',
               short: 'Requests go to the <b>simulated OpenAlex</b>. They stay in your browser, and the response is built from a saved, shortened copy of the actual one.',
               budget: 'Requests go to the <b>simulated OpenAlex</b>. They stay in your browser, and the response is built from a copy of the actual response, saved on October 7, 2026.'}
@@ -641,7 +643,7 @@ async function execute(code, step, live) {
   const ok = await Sandbox.capture(() => py.globals.get('_ws_run')(code, ns), sink);
   if (cut) html += '\n<span class="dim">The output is longer than this box shows. Print a smaller part.</span>';
   if (!html) html = '<span class="dim">(no output)</span>';
-  return {ok, html, ns, py, simulated: py.globals.get('_ws_sim_count')() > 0};
+  return {ok, html, ns, py, simulated: py.globals.get('_ws_sim_count')() > 0, limited: py.globals.get('_ws_limited')()};
 }
 // What a common error message means, in a sentence. The Python message stays above it.
 function explainError(html) {
@@ -668,9 +670,7 @@ function renderSteps() {
   $('steps').innerHTML = STEPS.map((s, i) => {
     const example = s.example ? `<div class="example"><div class="label">Example</div><pre>${esc(s.example)}</pre></div>
       <p><button data-act="example" data-q="${i}" disabled>Run the example</button></p><pre class="out" id="s${i}-example"></pre>` : '';
-    const work = s.handoff ? `<p>Open <code>week06_openalex_practice.ipynb</code>, in the <code>lessons/week06_web-apis</code> folder of the course repo.</p>
-        <p><a class="button" href="https://github.com/macss-berkeley/compss-211a/tree/main/lessons/week06_web-apis" target="_blank" rel="noopener">See the folder on GitHub</a></p>`
-      : `<h4>Your turn</h4><p class="task">${s.task}</p>
+    const work = `<h4>Your turn</h4><p class="task">${s.task}</p>
       <label class="small" for="s${i}-code">Your code</label>
       <textarea id="s${i}-code" spellcheck="false" autocomplete="off" rows="${Math.max(6, (s.scaffold || s.starter).split('\n').length + 1)}">${esc(s.starter)}</textarea>
       <div class="actions">
@@ -685,7 +685,7 @@ function renderSteps() {
       <details id="s${i}-answer" hidden><summary>One possible answer</summary><pre class="answer">${esc(s.answer)}</pre></details>
       <p class="small" id="s${i}-answer-wait">One possible answer appears here after you have checked an answer of your own.</p>`;
     return `<section class="q" id="s${i}" aria-labelledby="s${i}-title" hidden>
-      <div class="level">Step ${i + 1} of ${STEPS.length}${s.optional ? ' · Optional' : ''}</div>
+      <div class="level">Step ${i + 1} of ${STEPS.length}</div>
       <h2 id="s${i}-title" tabindex="-1">${esc(s.topic)}</h2>
       ${[].concat(s.intro || []).map(text => `<p>${text}</p>`).join('')}
       ${example}
@@ -702,7 +702,8 @@ function save() {
 function restore() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || 'null');
-    if (!saved || !Array.isArray(saved.code) || saved.code.length !== STEPS.length) return;
+    if (!saved || !Array.isArray(saved.code)) return;
+    if (saved.code.length !== STEPS.length) return;
     saved.code.forEach((text, i) => { if (typeof text === 'string' && STEPS[i].answer) $(`s${i}-code`).value = text; });
     for (const [name, set] of [['solved', solved], ['tried', tried]])
       (saved[name] || []).forEach(i => { if (Number.isInteger(i) && i >= 0 && i < STEPS.length) set.add(i); });
@@ -715,7 +716,7 @@ function restore() {
 function show(i, focus = true) {
   current = Math.max(0, Math.min(STEPS.length - 1, i));
   STEPS.forEach((_, n) => { $(`s${n}`).hidden = n !== current; });
-  $('picker').innerHTML = STEPS.map((s, n) => `<option value="${n}"${n === current ? ' selected' : ''}>${n + 1}. ${esc(s.topic)}${s.optional ? ' (optional)' : ''}${solved.has(n) ? ' ✓' : ''}</option>`).join('');
+  $('picker').innerHTML = STEPS.map((s, n) => `<option value="${n}"${n === current ? ' selected' : ''}>${n + 1}. ${esc(s.topic)}${solved.has(n) ? ' ✓' : ''}</option>`).join('');
   $('prev').disabled = current === 0;
   $('next').disabled = current === STEPS.length - 1;
   STEPS.forEach((s, n) => {
@@ -729,7 +730,7 @@ function show(i, focus = true) {
   // The strip above the step: which part of the work this step belongs to.
   const stages = [...$('stages').children], at = stages.findIndex(li => li.dataset.stage === STEPS[current].stage);
   stages.forEach((li, n) => { li.classList.toggle('done', n < at); if (n === at) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
-  const main = STEPS.map((s, n) => n).filter(n => STEPS[n].answer && !STEPS[n].optional);
+  const main = STEPS.map((s, n) => n).filter(n => STEPS[n].answer);
   $('progress').textContent = `${main.filter(n => solved.has(n)).length} of ${main.length} checked`;
   if (focus) $(`s${current}-title`).focus();
   save();
@@ -786,7 +787,11 @@ async function runBox(button) {
   try {
     result = await execute(code, act === 'scratch' ? null : s, live);
     const plain = result.ok ? '' : explainError(result.html);
-    out.innerHTML = result.html + (result.simulated ? `${/\n$/.test(result.html) ? '' : '\n'}<span class="dim">Answered by the simulated OpenAlex.</span>` : '');
+    // A 429 from the actual OpenAlex: the rest of this visit uses the simulated one. The choice is not saved.
+    if (result.limited) setSource('simulated', false);
+    const answeredBy = result.limited ? 'OpenAlex answered with the status code 429, which means too many requests: this network has used up its requests for today. The simulated OpenAlex answered this one, and the page now uses it.'
+      : result.simulated ? 'Answered by the simulated OpenAlex.' : '';
+    out.innerHTML = result.html + (answeredBy ? `${/\n$/.test(result.html) ? '' : '\n'}<span class="dim">${answeredBy}</span>` : '');
     if (act !== 'run' && act !== 'check') return;
     if (act === 'run') {
       if (plain) setFeedback(fb, 'bad', esc(plain)); else fb.className = 'feedback';
