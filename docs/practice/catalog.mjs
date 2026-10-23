@@ -418,8 +418,8 @@ export const skills = [
     "weeks": "Week 7",
     "releaseWeek": 7,
     "activity": null,
-    "practice": "Agentic-code guide — Explain a generated function and check its behavior on a tiny example.",
-    "url": "https://github.com/macss-berkeley/compss-211a/blob/main/lessons/week07_language-model-apis/agentic_code_verification_guide.md"
+    "practice": "MIT Missing Semester, Agentic Coding (Week 7 reading) — Explain a generated function and check its behavior on a tiny example.",
+    "url": "https://missing.csail.mit.edu/2026/agentic-coding/"
   },
   {
     "id": "modify-existing-code",
@@ -440,8 +440,8 @@ export const skills = [
     "weeks": "Week 7",
     "releaseWeek": 7,
     "activity": null,
-    "practice": "Lab 7 — Write an expected result, make a test fail, repair the defect, and rerun tests.",
-    "url": "https://github.com/macss-berkeley/compss-211a/blob/main/lab/lab07_agentic_code_verification.ipynb"
+    "practice": "Lab 7 — Check with assert that every label Gemini returns is one of the allowed labels.",
+    "url": "https://github.com/macss-berkeley/compss-211a/blob/main/lab/lab07_call_gemini_from_python.ipynb"
   },
   {
     "id": "keep-api-keys-safe",
@@ -605,7 +605,7 @@ export const skills = [
     "weeks": "Week 9",
     "releaseWeek": 9,
     "activity": null,
-    "practice": "Lab 9 §§3–5 — Inspect neighbors and clusters, then change the number of clusters.",
+    "practice": "Lab 9 §§3–4 — Find the nearest abstracts, list their shared terms, and read them to judge the match. §5 (optional) groups the abstracts with KMeans.",
     "url": "https://github.com/macss-berkeley/compss-211a/blob/main/lab/lab09_openalex_embeddings.ipynb"
   },
   {

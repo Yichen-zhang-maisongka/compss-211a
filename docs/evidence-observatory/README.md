@@ -1,0 +1,28 @@
+# The Echo Chamber
+
+A single exploratory first-person puzzle inside the Evidence Observatory. Eight independently operated lamps carry four underlying sources. The wiring is randomized each new game; there are sixteen valid solutions. A bank of lamps is never already a complete set of sources.
+
+The doorway responds continuously to the circuit: each source must reach the receiver exactly once. Repeated contributions produce unstable overlapping rings; missing sources leave gaps. More light alone cannot open the doorway. Correct choices are reversible until the player actually leaves.
+
+Clues are physical and agree with the circuit:
+
+- Thick, jacketed floor cables run in separate side lanes and rear rows, entering two distinct outlets on each well. Colored cores remain readable against the stone floor.
+- Each source has a distinct color and symbol, repeated on its well and engraved into the two connected lamp contacts. Symbols preserve the connection without relying on color.
+- Activating either a lamp contact or a well illuminates that entire source family, including both lamps regardless of their shutter state. The well and both lamp collars glow together. Light packets travel out from the well along both actual cable routes at a constant distance per second; reduced motion keeps the same connections continuously lit.
+- Each shutter changes that lamp's contribution to the receiver.
+
+Walk with WASD and look with the captured mouse. Escape releases the cursor for menus; click the scene to resume. Click the brass lever beside a light to move its shutter. Click the separate round contact near the pedestal base to send a pulse along its physical cable. The wells have plungers, and the receiver has a listening plate. The click targets and rendered controls share the same positions. Touch and the optional uncaptured mode use dragging to look and a tap/click on the mechanism to operate it; dragging never operates a switch. E or Space remains a keyboard alternative for the aimed mechanism. There is no automatic approach, global solve action, scripted sequence, timer, penalty, spreadsheet, or quest card. On entering, one unboxed sentence sets the goal: open the far door by making all four patterns in the central ring steady. Clickable parts share pale ceramic caps, brass fittings, and luminous inlays. Their inlays brighten within reach and ease brighter under aim; contacts and plungers recess briefly when pressed. Reduced motion preserves the material contrast and instant highlighting. Walking mode has no action buttons, hover labels, or floating target halos. Optional hints are requested in settings.
+
+“Explore without walking” provides individual landmark navigation, and text view describes the same circuit without showing unearned connections. These modes retain the same decisions and win condition. Reduced motion preserves static markings and wires.
+
+Open `play.html` or `dist/index.html` directly in a browser. Both are self-contained. No account, API key, model call, or server is required. Edit `shell.html` and the modules/styles under `dist/`, then run `node build-standalone.mjs` to update the local files and the GitHub Pages entry. Run `node check.mjs` to verify all switch configurations across multiple wirings, cable destinations, occlusion, movement passages, and packaging.
+
+The course lesson emerges from the player's actions: trace the origins of apparently separate observations before treating them as independent evidence. The ending makes this connection explicit only after the player solves the circuit.
+
+Inspired by [COMPSS 211A: Computing I](https://github.com/macss-berkeley/compss-211a), especially its [course synthesis](https://github.com/macss-berkeley/compss-211a/blob/main/lessons/week13_final-presentations/course_synthesis_and_next_steps.md). This is a metaphor rather than a real dataset. The unlisted GitHub Pages entry is `docs/interactives/echo-chamber.html`. It is omitted from course navigation and requests `noindex,nofollow,noarchive`; the URL is publicly accessible. Local previews remain available.
+
+## Atmosphere
+
+The chamber is now a vaulted moonlit instrument hall with brass orbital frames, an eclipsed moon, procedural stars, lit stone, reflective floor highlights, low drifting haze, suspended dust, and a bloom/vignette compositing pass. The doorway opens gradually and reveals a receding corridor of light. All geometry and effects are generated locally.
+
+Optional Web Audio starts only after a gesture. Source tones become unsettled when contributions overlap, and settle into a chord when balanced. Switches, well pulses, and soft footsteps share a generated reverb. Sound can be muted in the header or settings. Reduced motion and text mode remain available; the circuit needs no audio clue.
